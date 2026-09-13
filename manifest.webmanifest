@@ -1,0 +1,20 @@
+{
+  "name": "AlXPlay",
+  "short_name": "AlXPlay",
+  "description": "Reproductor móvil para videos de YouTube.",
+  "start_url": "./",
+  "id": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "assets/Logo%20AlXPlay.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
