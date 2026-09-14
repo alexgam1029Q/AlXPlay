@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css?v=listas-reproduccion" />
+    <link rel="stylesheet" href="styles.css?v=cache-v28" />
   </head>
   <body>
     <div class="app-shell">
@@ -32,6 +32,9 @@
           <a href="#inicio"><span>⌂</span> Inicio</a>
           <a href="#misNotas"><span>📝</span> Mis notas</a>
           <a href="#playlists"><span>▶</span> Listas de reproducción</a>
+          <a href="#estadisticas"><span>▥</span> Estadísticas</a>
+          <a href="#papelera"><span>♲</span> Papelera</a>
+          <div class="side-color-setting"><label for="cardOutlineColorDesktop">Contorno de videos<input id="cardOutlineColorDesktop" type="color" value="#ff2b2b" /></label><button id="resetCardOutlineDesktop" type="button">Restaurar color</button></div>
         </nav>
       </aside>
 
@@ -46,11 +49,12 @@
           <form class="search-form" id="videoForm">
             <label class="search-field">
               <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.5 4.5"></path></svg>
-              <input id="videoInput" type="text" placeholder="Pega una URL o ID de YouTube" autocomplete="off" />
+              <input id="videoInput" type="text" placeholder="Busca un video o pega su enlace de YouTube" autocomplete="off" /><button class="clear-search-input" id="clearSearchInput" type="button" aria-label="Cerrar búsqueda y limpiar campo">×</button>
             </label>
-            <button class="primary-button" type="submit"><span>Reproducir</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"></path></svg></button>
+            <button class="primary-button" type="submit"><span>Reproducir</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"></path></svg></button><button class="search-button" id="searchYoutubeButton" type="button"><span>Buscar</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.5 4.5"></path></svg></button><button class="add-video-button" id="addVideoButton" type="button"><span>Añadir video</span><span>＋</span></button>
           </form>
-          <p class="form-hint" id="formMessage">Admite enlaces youtube.com, youtu.be o IDs de video.</p>
+          <p class="form-hint" id="formMessage">Pega una URL o escribe un nombre para buscar en YouTube.</p>
+          <div class="youtube-results-toolbar" id="youtubeResultsToolbar"><span>Resultados de búsqueda</span></div><div class="youtube-results" id="youtubeResults" aria-live="polite"></div>
         </section>
 
         <div class="credit-row">
@@ -66,7 +70,7 @@
         <section class="history-panel" aria-label="Historial de videos recientes">
           <div class="history-header">
             <span class="history-label">Historial reciente</span>
-            <button id="clearAllHistory" class="clear-history-button" type="button">Limpiar todo</button>
+            <div class="history-actions"><input id="historySearch" class="history-search" type="search" placeholder="Buscar videos..." aria-label="Buscar videos" /><label class="favorite-filter"><input id="favoritesOnly" type="checkbox" /> Solo favoritos</label><button id="clearAllHistory" class="clear-history-button" type="button">Limpiar todo</button></div>
           </div>
           <div id="videoGrid" class="video-grid" aria-live="polite"></div>
         </section>
@@ -88,8 +92,21 @@
 
         <section class="playlists-panel" id="playlists" aria-label="Listas de reproducción">
           <div class="history-header"><span class="history-label">▶ Listas de reproducción</span><a class="notes-back" href="#inicio">← Videos</a></div>
-          <div class="playlist-toolbar"><span class="notes-count" id="playlistCount"></span><button class="notes-tool-button" id="newPlaylistButton" type="button">＋ Nueva lista</button></div>
+          <div class="playlist-toolbar"><span class="notes-count" id="playlistCount"></span><input id="playlistSearch" class="notes-search" type="search" placeholder="Buscar en listas..." aria-label="Buscar listas" /><select id="playlistSort" class="notes-select" aria-label="Ordenar listas"><option value="modified">Más recientes</option><option value="title">Por título</option><option value="size">Más videos</option></select><button class="notes-tool-button" id="exportPlaylistsButton" type="button">↓ Exportar listas</button><button class="notes-tool-button" id="importPlaylistsButton" type="button">↑ Importar listas</button><input id="importPlaylistsInput" type="file" accept="application/json,.json" hidden /><button class="notes-tool-button" id="newPlaylistButton" type="button">＋ Nueva lista</button></div>
           <div id="playlistsGrid" class="playlists-grid" aria-live="polite"></div>
+        </section>
+
+        <section class="stats-panel" id="estadisticas" aria-label="Estadísticas personales">
+          <div class="history-header"><span class="history-label">▥ Estadísticas personales</span><a class="notes-back" href="#inicio">← Videos</a></div>
+          <div class="stats-toolbar"><select id="statsPeriod" class="notes-select" aria-label="Periodo de estadísticas"><option value="all">Todo el tiempo</option><option value="today">Hoy</option><option value="week">Esta semana</option><option value="month">Este mes</option></select><button class="notes-tool-button" id="backupAllButton" type="button">↓ Copia de seguridad</button><button class="notes-tool-button" id="exportFavoritesButton" type="button">★ Exportar favoritos</button><button class="notes-tool-button" id="exportProgressButton" type="button">↗ Exportar progreso</button><button class="notes-tool-button" id="restoreAllButton" type="button">↑ Restaurar copia</button><input id="restoreAllInput" type="file" accept="application/json,.json" hidden /></div>
+          <div class="stats-grid"><article class="stat-card"><span>Tiempo visto</span><strong id="statsWatchTime">00:00:00</strong></article><article class="stat-card"><span>Videos terminados</span><strong id="statsCompleted">0</strong></article><article class="stat-card"><span>Favoritos</span><strong id="statsFavorites">0</strong></article><article class="stat-card"><span>Videos guardados</span><strong id="statsSaved">0</strong></article></div>
+          <div class="stats-section"><h3>Historial de búsquedas</h3><div id="searchHistoryList" class="search-history-list"></div><button class="text-button" id="clearSearchHistoryButton" type="button">Borrar búsquedas</button></div>
+          <div class="stats-section"><h3>Recordatorios</h3><div id="remindersList" class="search-history-list"></div></div>
+        </section>
+
+        <section class="trash-panel" id="papelera" aria-label="Papelera">
+          <div class="history-header"><span class="history-label">♲ Papelera</span><a class="notes-back" href="#inicio">← Videos</a><button class="clear-history-button" id="emptyTrashButton" type="button">Vaciar papelera</button></div>
+          <div id="trashGrid" class="video-grid" aria-live="polite"></div>
         </section>
 
       </main>
@@ -97,7 +114,7 @@
       <nav class="bottom-nav" aria-label="Navegación principal">
         <a class="nav-item active" href="#inicio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 10 8-6 8 6v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9Z"></path><path d="M9 20v-6h6v6"></path></svg><span>Inicio</span></a>
         <a class="nav-item" href="#misNotas">📝 <span>Notas</span></a>
-        <button class="nav-item" id="settingsButton" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.7 1.7-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.1h-2.4v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-1.7-1.7.1-.1A1.7 1.7 0 0 0 8.4 15a1.7 1.7 0 0 0-1.6-1H6.7v-2.4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L8 8.6l1.7-1.7.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6v-.1h2.4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.7 1.7-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.1V14h-.1a1.7 1.7 0 0 0-1.6 1Z"></path></svg><span>Ajustes</span></button>
+        <div class="settings-wrap"><button class="nav-item" id="settingsButton" type="button" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.7 1.7-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.1h-2.4v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-1.7-1.7.1-.1A1.7 1.7 0 0 0 8.4 15a1.7 1.7 0 0 0-1.6-1H6.7v-2.4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L8 8.6l1.7-1.7.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6v-.1h2.4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.7 1.7-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.1V14h-.1a1.7 1.7 0 0 0-1.6 1Z"></path></svg><span>Ajustes</span></button><div class="settings-popover" id="settingsPopover" aria-hidden="true"><label for="cardOutlineColor">Contorno de videos<input id="cardOutlineColor" type="color" value="#ff2b2b" /></label><button id="resetCardOutline" type="button">Restaurar color</button></div></div>
       </nav>
     </div>
 
@@ -105,17 +122,20 @@
       <div class="player-topbar"><button class="icon-button light" id="closePlayer" type="button" aria-label="Cerrar reproductor"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"></path></svg></button><span class="player-label"><img src="assets/Logo Ajustado.png" alt="AlXPlay" /><span>AlXPlay <b>NOW</b></span></span></div>
       <div class="player-frame-wrap"><div class="player-frame"><iframe id="youtubeFrame" title="Reproductor de video de YouTube" allow="autoplay; fullscreen; picture-in-picture"></iframe></div></div>
       <div class="video-controls-inline" aria-label="Controles del video">
-        <button id="videoPlayButton" type="button">▶ Reproducir</button>
-        <button id="videoPauseButton" type="button">Ⅱ Pausar</button>
+        <button id="videoToggleButton" type="button" data-playing="false">▶ Reproducir</button>
         <button id="videoMuteButton" type="button">🔊 Silenciar</button>
-        <button id="videoReplayButton" type="button">↻ Repetir</button>
         <button id="videoFullscreenButton" type="button">⛶ Pantalla</button>
-        <button id="openPlayerNoteButton" type="button">📝 Notas</button>
-        <button id="togglePlayerNotesButton" class="player-notes-toggle" type="button" aria-label="Mostrar notas del video" aria-expanded="false">⋯</button>
+        <div class="player-note-menu-wrap"><button id="openPlayerNoteButton" type="button">📝 Notas</button><div id="playerNoteMenu" class="player-note-menu" aria-hidden="true"><button id="createVideoNoteButton" type="button">＋ Crear nota</button><button id="viewVideoNotesButton" type="button">▣ Ver notas del video</button></div></div>
+        <button id="playerFavoriteButton" type="button" aria-pressed="false">☆ Favorito</button>
+        <div class="player-action-menu-wrap"><button id="addQueueButton" type="button" aria-expanded="false">＋ Cola</button><div id="queueActionMenu" class="player-action-menu" aria-hidden="true"><button id="addToQueueMenuButton" type="button">＋ Añadir a cola</button><button id="viewQueueMenuButton" type="button">▣ Ver cola</button></div></div>
+        <div class="player-action-menu-wrap"><button id="quickMarkerButton" type="button" aria-expanded="false">⏱ Marca</button><div id="markerActionMenu" class="player-action-menu" aria-hidden="true"><button id="addMarkerMenuButton" type="button">＋ Agregar marca</button><button id="viewMarkersMenuButton" type="button">▣ Ver marcas</button></div></div>
+        <div class="player-more"><button id="togglePlayerNotesButton" class="player-notes-toggle" type="button" aria-label="Más opciones" aria-expanded="false">⋯</button><div id="playerMoreMenu" class="player-more-menu" aria-hidden="true"><div class="more-menu-section"><div class="video-timer"><label for="videoTimerMinutes">⏱ Detener en</label><div class="video-timer-controls"><input id="videoTimerMinutes" type="number" min="15" max="180" step="15" placeholder="15 min" /><button id="videoTimerButton" type="button">Activar</button></div></div><div class="video-reminder"><input id="reminderDate" type="datetime-local" aria-label="Elegir fecha y hora del recordatorio" /><button id="reminderButton" type="button">⏰ Recordarme volver</button></div></div></div></div>
       </div>
+      <div class="player-options"><label>Velocidad <select id="playbackRate"><option value="0.5">0.5x</option><option value="0.75">0.75x</option><option value="1" selected>1x</option><option value="1.25">1.25x</option><option value="1.5">1.5x</option><option value="2">2x</option></select></label><label class="autoplay-option"><input id="autoplayNext" type="checkbox" checked /> Siguiente automático</label></div>
       <label class="video-volume">🔊 Volumen <input id="videoVolume" type="range" min="0" max="100" step="10" value="100" /></label>
-      <div class="video-timer"><label for="videoTimerMinutes">⏱ Detener en</label><div class="video-timer-controls"><input id="videoTimerMinutes" type="number" min="15" max="180" step="15" placeholder="15 min" /><button id="videoTimerButton" type="button">Activar</button></div><span id="videoTimerStatus" aria-live="polite"></span></div>
-      <div class="player-info"><div><span class="section-kicker">Reproduciendo ahora</span><h2 id="playerTitle">Video de YouTube</h2><p class="player-channel" id="playerChannel">Canal de YouTube</p><a class="watch-button" id="watchOnYoutube" href="#" target="_blank" rel="noreferrer">Abrir en YouTube <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5M19 5l-8 8"></path><path d="M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path></svg></a></div><div class="player-info-actions"><aside class="player-notes" id="playerNotesPanel" aria-label="Notas de este video"></aside><button class="round-button" id="shareButton" type="button" aria-label="Compartir video"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5"></circle><circle cx="6" cy="12" r="2.5"></circle><circle cx="18" cy="19" r="2.5"></circle><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"></path></svg></button></div></div>
+      <span id="videoTimerStatus" class="video-timer-status outside" aria-live="polite"></span>
+      <section class="queue-panel" id="queuePanel" aria-label="Cola de reproducción"><div class="queue-header"><strong>Cola</strong><div><button id="clearQueueButton" type="button">Limpiar</button><button id="closeQueueButton" type="button" aria-label="Cerrar cola">×</button></div></div><div id="queueList" class="queue-list"></div></section>
+      <div class="player-progress"><span id="playerProgressLabel">0% visto</span><progress id="playerProgressBar" max="100" value="0"></progress></div><div class="player-info"><div><span class="section-kicker">Reproduciendo ahora</span><h2 id="playerTitle">Video de YouTube</h2><p class="player-channel" id="playerChannel">Canal de YouTube</p><a class="watch-button" id="watchOnYoutube" href="#" target="_blank" rel="noreferrer">Abrir en YouTube <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5M19 5l-8 8"></path><path d="M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path></svg></a></div><div class="player-info-actions"><aside class="player-notes" id="playerNotesPanel" aria-label="Notas de este video"></aside><button class="round-button" id="shareButton" type="button" aria-label="Compartir video"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5"></circle><circle cx="6" cy="12" r="2.5"></circle><circle cx="18" cy="19" r="2.5"></circle><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"></path></svg></button></div></div>
     </div>
     <div class="note-modal" id="noteModal" aria-hidden="true">
       <form class="note-dialog" id="noteForm">
@@ -127,8 +147,34 @@
         <textarea class="note-input note-textarea" id="noteContent" maxlength="10000" required placeholder="Escribe tu nota aquí..."></textarea>
         <div class="note-options"><label class="note-label" for="noteTags">Etiquetas</label><input class="note-input" id="noteTags" type="text" maxlength="160" placeholder="Ej. importante, ideas" /><label class="note-label" for="noteColor">Color</label><input id="noteColor" class="note-color" type="color" value="#ffd21a" /></div>
         <div class="manual-timestamp"><label class="note-label" for="noteTimestampSeconds">Hora del video</label><div class="manual-timestamp-row"><input class="note-input" id="noteTimestampSeconds" type="text" inputmode="numeric" pattern="[0-9]{2}:[0-9]{2}:[0-9]{2}" placeholder="Ej. 00:13:22" /><button class="manual-timestamp-button" id="insertTimestampButton" type="button">Insertar</button></div></div>
+        <div class="note-markers"><label class="note-label" for="noteMarkerPicker">Marcas de este video</label><div class="note-marker-picker" id="noteMarkerPicker"></div></div>
         <div class="note-dialog-actions"><button class="text-button" id="cancelNote" type="button">Cancelar</button><button class="primary-button" type="submit">💾 Guardar nota</button></div>
       </form>
+    </div>
+    <div class="note-modal" id="addVideoModal" aria-hidden="true">
+      <div class="note-dialog add-video-dialog">
+        <div class="note-dialog-header"><div><span class="section-kicker">＋ Añadir video</span><h2>Guardar en historial</h2></div><button class="icon-button" id="closeAddVideo" type="button" aria-label="Cerrar añadir video">×</button></div>
+        <div class="add-video-preview"><img id="addVideoThumbnail" src="" alt="Miniatura del video" /><div><h3 id="addVideoTitle"></h3><p id="addVideoChannel"></p></div></div>
+        <p class="note-video-name">El video se añadirá al historial sin reproducirse.</p>
+        <div class="note-dialog-actions"><button class="text-button" id="cancelAddVideo" type="button">Cancelar</button><button class="primary-button" id="confirmAddVideo" type="button">＋ Añadir</button></div>
+      </div>
+    </div>
+    <div class="note-modal" id="markerModal" aria-hidden="true">
+      <form class="note-dialog marker-dialog" id="markerForm">
+        <div class="note-dialog-header"><div><span class="section-kicker">⏱ Marca de video</span><h2>Agregar marca</h2></div><button class="icon-button" id="closeMarker" type="button" aria-label="Cerrar marca">×</button></div>
+        <p class="note-video-name" id="markerVideoName"></p>
+        <label class="note-label" for="markerTitle">Título de la marca</label>
+        <input class="note-input" id="markerTitle" type="text" maxlength="120" required placeholder="Ej. Idea principal" />
+        <p class="marker-time" id="markerTime"></p>
+        <div class="note-dialog-actions"><button class="text-button" id="cancelMarker" type="button">Cancelar</button><button class="primary-button" type="submit">💾 Guardar marca</button></div>
+      </form>
+    </div>
+    <div class="note-modal" id="markersViewModal" aria-hidden="true">
+      <div class="note-dialog marker-dialog">
+        <div class="note-dialog-header"><div><span class="section-kicker">⏱ Marcas de video</span><h2>Ver marcas</h2></div><button class="icon-button" id="closeMarkersView" type="button" aria-label="Cerrar marcas">×</button></div>
+        <p class="note-video-name" id="markersViewVideoName"></p>
+        <div class="saved-markers-list" id="savedMarkersList"></div>
+      </div>
     </div>
     <div class="note-modal" id="sharedNoteModal" aria-hidden="true">
       <form class="note-dialog" id="sharedNoteForm">
@@ -153,12 +199,21 @@
         <input class="note-input" id="playlistTitle" type="text" maxlength="100" required placeholder="Ej. Videos para aprender" />
         <label class="note-label" for="playlistDescription">Descripción</label>
         <textarea class="note-input playlist-description" id="playlistDescription" maxlength="300" placeholder="Describe esta lista..."></textarea>
+        <label class="note-label" for="playlistTags">Carpeta o etiquetas</label>
+        <input class="note-input" id="playlistTags" type="text" maxlength="160" placeholder="Ej. estudio, favoritos" />
         <label class="note-label">Videos del historial</label>
         <div id="playlistVideoPicker" class="playlist-video-picker"></div>
         <div class="note-dialog-actions"><button class="text-button" id="cancelPlaylist" type="button">Cancelar</button><button class="primary-button" type="submit">💾 Guardar lista</button></div>
       </form>
     </div>
+    <div class="note-modal" id="confirmActionModal" aria-hidden="true">
+      <div class="note-dialog confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirmActionTitle">
+        <div class="note-dialog-header"><div><span class="section-kicker">⚠️ Confirmar acción</span><h2 id="confirmActionTitle">¿Confirmar acción?</h2></div><button class="icon-button" id="closeConfirmAction" type="button" aria-label="Cerrar confirmación">×</button></div>
+        <p class="note-video-name" id="confirmActionMessage"></p>
+        <div class="note-dialog-actions"><button class="text-button" id="cancelConfirmAction" type="button">Cancelar</button><button class="delete-confirm-button" id="confirmActionButton" type="button">Confirmar</button></div>
+      </div>
+    </div>
     <div class="toast" id="toast" role="status"></div>
-    <script src="app.js?v=listas-reproduccion" ></script>
+    <script src="app.js?v=cache-v28" ></script>
   </body>
 </html>
