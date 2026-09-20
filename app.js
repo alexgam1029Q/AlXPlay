@@ -443,8 +443,11 @@ function togglePlayback() {
 }
 
 function saveCurrentVideoPosition() {
-  if (!currentVideo || !hasReceivedVideoTime || currentVideoTime <= 0) return;
-  videoProgress[currentVideo.id] = Math.floor(currentVideoTime);
+  if (!currentVideo) return;
+  const position = Number(currentVideoTime);
+  if (!Number.isFinite(position) || position < 0) return;
+  if (position === 0 && !hasReceivedVideoTime && getVideoPosition(currentVideo.id) === 0) return;
+  videoProgress[currentVideo.id] = Math.floor(position);
   localStorage.setItem('alxplay-progress', JSON.stringify(videoProgress));
 }
 
@@ -975,7 +978,7 @@ function openPlayer(id, title = 'Video de YouTube', channel = 'Canal de YouTube'
   currentVideoTime = getVideoPosition(id);
   currentVideoDuration = 0;
   lastProgressTick = 0;
-  hasReceivedVideoTime = false;
+  hasReceivedVideoTime = currentVideoTime > 0;
   updatePlaybackButton(false);
   youtubeFrame.src = `https://www.youtube.com/embed/${id}?controls=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}&rel=0&modestbranding=1&playsinline=1`;
   watchOnYoutube.href = `https://www.youtube.com/watch?v=${id}`;
